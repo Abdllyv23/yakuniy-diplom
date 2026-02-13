@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { authRequired } from './middleware/auth.js';
@@ -12,14 +12,13 @@ import userRoutes from './routes/users.js';
 import dashboardRoutes from './routes/dashboard.js';
 import settingsRoutes from './routes/settings.js';
 
-dotenv.config();
-
 const app = express();
 const port = Number(process.env.PORT || 5000);
+const corsOrigin = process.env.CORS_ORIGIN || process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173' }));
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 

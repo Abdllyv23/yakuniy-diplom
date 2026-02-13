@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 const empty = { name: '', description: '', price: '', stock: '', category: '' };
 
 export default function Products() {
@@ -48,7 +50,7 @@ export default function Products() {
         <button>{editing ? 'Update' : 'Add'} Product</button>
       </form>
       <table><thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Stock</th><th /></tr></thead><tbody>
-        {products.map((p) => <tr key={p.id}><td>{p.image_url && <img src={`http://localhost:5000${p.image_url}`} width="40" />}</td><td>{p.name}</td><td>${p.price}</td><td>{p.stock}</td><td><button onClick={() => edit(p)}>Edit</button><button onClick={async () => { await api.delete(`/products/${p.id}`); notify('Deleted'); load(); }}>Delete</button></td></tr>)}
+        {products.map((p) => <tr key={p.id}><td>{p.image_url && <img src={`${API_BASE_URL}${p.image_url}`} width="40" />}</td><td>{p.name}</td><td>${p.price}</td><td>{p.stock}</td><td><button onClick={() => edit(p)}>Edit</button><button onClick={async () => { await api.delete(`/products/${p.id}`); notify('Deleted'); load(); }}>Delete</button></td></tr>)}
       </tbody></table>
     </div>
   );

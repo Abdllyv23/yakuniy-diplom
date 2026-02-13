@@ -1,24 +1,42 @@
 import pg from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const { Pool } = pg;
 
-export const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT || 5432),
-  user: process.env.DB_USER || 'postgres',
-  password: String(process.env.DB_PASSWORD ?? '123456'),
-  database: process.env.DB_NAME || 'seller_admin'
-});
+function readDatabaseConfig() {
+  if (process.env.DATABASE_URL) {
+    return {
+      connectionString: process.env.DATABASE_URL
+    };
+  }
+
+  const required = ['PGHOST', 'PGPORT', 'PGUSER', 'PGPASSWORD', 'PGDATABASE'];
+  const missing = required.filter((key) => !process.env[key] || String(process.env[key]).trim() === '');
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required database environment variables: ${missing.join(', ')}. ` +
+        'Set DATABASE_URL or all PG* variables in backend/.env before starting backend.'
+    );
+  }
+
+  return {
+    host: process.env.PGHOST,
+    port: Number(process.env.PGPORT),
+    user: process.env.PGUSER,
+    password: String(process.env.PGPASSWORD),
+    database: process.env.PGDATABASE
+  };
+}
+
+const dbConfig = readDatabaseConfig();
+
+export const pool = new Pool(dbConfig);
 
 export async function initializeDatabase() {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    // Core admin users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS admins (
         id SERIAL PRIMARY KEY,
@@ -30,7 +48,6 @@ export async function initializeDatabase() {
       );
     `);
 
-    // Platform users managed by admin panel
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -42,7 +59,6 @@ export async function initializeDatabase() {
       );
     `);
 
-    // Product catalog
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -57,7 +73,6 @@ export async function initializeDatabase() {
       );
     `);
 
-    // Orders for management dashboard
     await client.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
@@ -70,7 +85,6 @@ export async function initializeDatabase() {
       );
     `);
 
-    // Per-admin panel preferences
     await client.query(`
       CREATE TABLE IF NOT EXISTS admin_settings (
         id SERIAL PRIMARY KEY,
