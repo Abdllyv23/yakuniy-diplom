@@ -3,6 +3,8 @@ import i18n from '../i18n';
 import { api } from '../api/client';
 import { useApp } from '../context/AppContext';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export default function Settings() {
   const { theme, language, updateTheme, updateLanguage, updateBackground, notify } = useApp();
   const [selectedTheme, setSelectedTheme] = useState(theme);
@@ -15,7 +17,7 @@ export default function Settings() {
       if (!data) return;
       setSelectedTheme(data.theme || theme);
       setSelectedLanguage(data.language || language);
-      if (data.background_image) updateBackground(`http://localhost:5000${data.background_image}`);
+      if (data.background_image) updateBackground(`${API_BASE_URL}${data.background_image}`);
     });
   }, []);
 
@@ -30,7 +32,7 @@ export default function Settings() {
     updateTheme(data.theme);
     updateLanguage(data.language);
     i18n.changeLanguage(data.language);
-    if (data.background_image) updateBackground(`http://localhost:5000${data.background_image}`);
+    if (data.background_image) updateBackground(`${API_BASE_URL}${data.background_image}`);
     notify('Settings updated');
   };
 
